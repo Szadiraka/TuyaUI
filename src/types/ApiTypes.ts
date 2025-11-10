@@ -1,6 +1,6 @@
 
  export interface LoginType{
-    mail: string;
+    email: string;
     password: string;
  };
 
@@ -14,6 +14,8 @@
     name: string;
     email: string;
     role:string;
+    confirmEmail : string;
+    token?: string;
     [key: string]: any;
  }
 

@@ -9,6 +9,7 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -25,5 +26,5 @@
     "noFallthroughCasesInSwitch": true,
     // "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src", "src/hooks/.useGenerateCode.ts"]
 }

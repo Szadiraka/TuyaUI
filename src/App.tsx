@@ -1,18 +1,16 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Content from "./pages/Content";
-import Authentificaton from "./pages/Authentificaton";
+import { BrowserRouter } from "react-router-dom";
+
 import { useSignalR } from "./hooks/useSignalR";
+
+import AppRoutes from "./routes/AppRoutes";
 
 const App = () => {
   useSignalR();
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Authentificaton />} />
-        <Route path="/content" element={<Content />} />
-      </Routes>
+      <AppRoutes />
     </BrowserRouter>
   );
 };

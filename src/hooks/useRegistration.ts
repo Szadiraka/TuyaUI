@@ -10,6 +10,7 @@ export const useRegistration =()=>{
 
 
 
+
     const registration = async (user: UserType) =>{
         setLoadingRegistration(true);
         setErrorRegistration(null);

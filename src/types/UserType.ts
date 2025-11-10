@@ -1,7 +1,7 @@
 
-export type UserType = {
+export type UserType = {   
     name: string;
-    mail: string;
+    email: string;
     password: string;
     confirmPassword: string;
     roleName: string | null;

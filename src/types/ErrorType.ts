@@ -1,6 +1,6 @@
 export type ErrorType = {
     errorName: string;
-    errorMail: string;
+    errorEmail: string;
     errorPassword: string;
     errorConfirmPassword: string;
     [key:string] :string

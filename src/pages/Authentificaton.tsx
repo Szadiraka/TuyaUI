@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useState } from "react";
 import { type UserProps } from "../types/UserProps";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
@@ -7,69 +7,132 @@ import { useLogin } from "../hooks/useLogin";
 import { useRegistration } from "../hooks/useRegistration";
 import { AiOutlineClose } from "react-icons/ai";
 
+import { useGenerateCode } from "../hooks/useGenerateCode";
+import { useConfirmCode } from "../hooks/useConfirmCode";
+import { logout } from "../services/tokenService";
+import { userStore } from "../store/UserStore";
+
 const Authentificaton: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [register, setRegister] = useState<boolean>(false);
   const [userProps, setUserProps] = useState<UserProps>({
     user: {
       name: "",
-      mail: "",
+      email: "",
       password: "",
       confirmPassword: "",
       roleName: null,
     },
     errors: {
       errorName: "",
-      errorMail: "",
+      errorEmail: "",
       errorPassword: "",
       errorConfirmPassword: "",
     },
   });
-
-  const { login } = useLogin();
-  const { registration } = useRegistration();
-  // это временно, нужно будет убрать после отладки
-  const [error, setErrors] = useState<string | null>(null);
-  const [msg, setMsg] = useState<string | null>(
-    "вы успешно зарегистрировались"
-  );
+  const [code, setCode] = useState<number | null>(null);
+  const [seconds, setSeconds] = useState<string | null>(null);
+  const { login, error, setErrors } = useLogin();
+  const { registration, errorRegistration, setErrorRegistration } =
+    useRegistration();
+  const { generate, errorGenerateCode } = useGenerateCode();
+  const { confirm, errorConfirmCode } = useConfirmCode();
+  const [msg, setMsg] = useState<string | null>(null);
+  const [showTimer, setShowTimer] = useState<boolean>(false);
   //--------------
-
-  //-----------
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // логика, которая будет выполняться при отправке формы
     if (register) {
       compareData("name", userProps.user.name);
-      compareData("mail", userProps.user.mail);
+      compareData("email", userProps.user.email);
       compareData("password", userProps.user.password);
       compareData("confirmPassword", userProps.user.confirmPassword);
 
       if (
         userProps.errors.errorName ||
-        userProps.errors.errorMail ||
+        userProps.errors.errorEmail ||
         userProps.errors.errorPassword ||
         userProps.errors.errorConfirmPassword
       )
         return;
       // отправка запроса на сервер, если все ок - очищаем поля и переводим на поле входа, заполняя при этом полями email и пароле
+
       let message = await registration(userProps.user);
       if (message) {
         //показать сообщение- что все ок, и перевести на поле входа
         setRegister(false);
         setShowPassword(false);
         setMsg(message);
+        setShowTimer(false);
       }
     } else {
-      let mail = userProps.user.mail;
+      let email = userProps.user.email;
       let password = userProps.user.password;
       // отправка запроса на сервер, если все ок - получаем jwt-токен и переводим на поле контента
-      await login(mail, password);
-      // тут нужно отбработатьь случай подтверждения почты!!!!
 
-      // ----------------------//
+      let msg = await login(email, password);
+      if (msg) {
+        setMsg(msg);
+        setShowTimer(true);
+        //функция отсчета времени подтверждения
+        counter(300);
+      }
     }
+  };
+
+  const counter = (seconds: number) => {
+    cleanAllFields();
+    if (timerRef.current) clearInterval(timerRef.current);
+    let current = seconds;
+    timerRef.current = setInterval(() => {
+      if (current <= 0) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setSeconds(null);
+        return;
+      }
+      let min = Math.floor(current / 60);
+      let sec = current % 60;
+      let min_s = "",
+        sec_s = "";
+      min_s = min < 10 ? "0" + min : min.toString();
+      sec_s = sec < 10 ? "0" + sec : sec.toString();
+      setSeconds(`${min_s}:${sec_s}`);
+      current--;
+    }, 1000);
+  };
+
+  const checkCode = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (seconds === null) {
+      //отправить запрос на сервер, для отправки нового кода
+
+      let result = await generate();
+      if (result) {
+        setMsg("Код отправлен на почту");
+        counter(300);
+        return;
+      } else {
+        setMsg(errorGenerateCode || "Не удалось отправить код.");
+      }
+    } else {
+      //отправить запрос на сервер, для подтверждения
+      if (!code) {
+        setMsg("Введите код");
+        return;
+      }
+
+      const result = await confirm(code);
+      if (!result) {
+        setMsg(errorConfirmCode || "Код неверный или истёк срок действия");
+      }
+    }
+
+    setCode(null);
+    setSeconds(null);
+    if (timerRef.current) clearInterval(timerRef.current);
   };
 
   const setData = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +175,7 @@ const Authentificaton: React.FC = () => {
           return setError(errorName, "Maximum 20 characters");
         break;
 
-      case "mail":
+      case "email":
         if (!value) return setError(errorName, "This field is required");
         if (!isValidEmail(value))
           return setError(errorName, "Invalid email format");
@@ -141,14 +204,14 @@ const Authentificaton: React.FC = () => {
     setUserProps({
       user: {
         name: "",
-        mail: "",
+        email: "",
         password: "",
         confirmPassword: "",
         roleName: null,
       },
       errors: {
         errorName: "",
-        errorMail: "",
+        errorEmail: "",
         errorPassword: "",
         errorConfirmPassword: "",
       },
@@ -166,7 +229,12 @@ const Authentificaton: React.FC = () => {
       className="w-screen h-screen bg-blue-50  flex flex-col justify-center items-center p-2 "
       onClick={() => {
         setErrors(null);
+        setErrorRegistration(null);
         setMsg(null);
+        setCode(null);
+        logout();
+        userStore.clear();
+        if (timerRef.current) clearInterval(timerRef.current);
       }}
     >
       <div className="w-full sm:max-w-[500px]  bg-gray-50  rounded-xl p-4  shadow-2xl border-2 border-gray-100 relative">
@@ -205,14 +273,14 @@ const Authentificaton: React.FC = () => {
             <label className="text-xl font-semibold min-w-[100px]">Mail</label>
             <input
               type="text"
-              name="mail"
+              name="email"
               className={`border-2 border-gray-200 w-full outline-none p-2 rounded-md focus:ring-2 ${
-                userProps.errors.errorMail !== ""
+                userProps.errors.errorEmail !== ""
                   ? "border-red-400"
                   : "border-gray-200"
               } text-xl font-semibold text-black ring-blue-400 bg-white`}
               placeholder="enter your mail"
-              value={userProps.user.mail}
+              value={userProps.user.email}
               onChange={setData}
               onFocus={resetError}
               onBlur={checkData}
@@ -220,7 +288,7 @@ const Authentificaton: React.FC = () => {
           </div>
           {userProps.errors.errorMail && register && (
             <p className="text-red-500 ml-[110px]">
-              {userProps.errors.errorMail}
+              {userProps.errors.errorEmail}
             </p>
           )}
 
@@ -304,29 +372,66 @@ const Authentificaton: React.FC = () => {
             {register ? "Login" : "Register"}
           </button>
         </p>
+
         {/* модальное окно */}
-        {(error || msg) && (
+        {(error || errorRegistration || msg) && (
           <div
             className="p-2 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
                        border-2 border-gray-100 rounded-xl z-20  h-full w-full bg-white shadow-2xl
                         flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {error && (
+            {(error || errorRegistration) && (
               <h2 className="text-2xl font-semibold text-red-500 text-center">
-                Что-то пошло не так gfgdfgfdgddddddddddddd
+                {error} {errorRegistration}
               </h2>
             )}
+            {/* /--------------------------------------------------------- */}
             {msg && (
-              <h2 className="text-2xl font-semibold text-green-500 text-center">
-                Поздравляем!
-              </h2>
-            )}
-
-            {(error || msg) && (
-              <p className="mt-4 text-xl">
-                {error} {msg}
-              </p>
+              <div className="flex flex-col items-center justify-center p-4  mt-2 gap-2 w-full">
+                <h2 className="text-xl font-semibold text-green-500 ">{msg}</h2>
+                {showTimer && (
+                  <>
+                    <div className="gap-3 flex flex-row items-center mt-4  w-full">
+                      <label className="text-xl font-semibold  min-w-[100px]">
+                        Timer
+                      </label>
+                      <p className="border-2 border-gray-200 w-full px-2 rounded-md  text-xl py-2 min-h-[44px]  ">
+                        {seconds}
+                      </p>
+                    </div>
+                    <form
+                      onSubmit={checkCode}
+                      className="flex flex-col items-center gap-4  w-full"
+                    >
+                      <div className="gap-3 flex flex-row items-center mt-4  w-full ">
+                        <label className="text-xl font-semibold  min-w-[100px]">
+                          Code
+                        </label>
+                        <input
+                          className="border-2 border-gray-200 w-full outline-none p-2 rounded-md focus:ring-2  text-xl font-semibold text-black ring-blue-400"
+                          type="number"
+                          name="code"
+                          min={100000}
+                          max={999999}
+                          value={code ? code : ""}
+                          onChange={(e) => setCode(+e.target.value)}
+                        />
+                      </div>
+                      <div className="flex flex-row justify-end mt-4 ">
+                        <button
+                          type="submit"
+                          className="bg-blue-500 hover:bg-blue-600 hover:cursor-pointer text-white text-xl  py-2 px-4 rounded"
+                        >
+                          {seconds === null || seconds === ""
+                            ? "Прислать новый"
+                            : "Подтвердить"}
+                        </button>
+                      </div>
+                    </form>
+                  </>
+                )}
+              </div>
             )}
 
             <button
@@ -334,7 +439,13 @@ const Authentificaton: React.FC = () => {
                hover:border-red-500"
               onClick={() => {
                 setErrors(null);
+                setErrorRegistration(null);
                 setMsg(null);
+                setCode(null);
+                logout();
+                userStore.clear();
+                if (timerRef.current) clearInterval(timerRef.current);
+                console.log(userStore.getData());
               }}
             >
               <AiOutlineClose size={24} />
