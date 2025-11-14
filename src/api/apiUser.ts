@@ -1,6 +1,6 @@
 import axios from "axios";
-import { type LoginType, type SuccessResponse } from "../types/ApiTypes";
-import type { UserType } from "../types/UserType";
+import { type LoginType, type SuccessResponse } from "../types/apiTypes/ApiTypes";
+import type { UserType } from "../types/localTypes/UserType";
 
 
 

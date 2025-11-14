@@ -1,7 +1,7 @@
 
 import {useState} from "react";
-import { confirmCode } from "../api/apiCode";
-import { userStore } from "../store/UserStore";
+import { confirmCode } from "../../api/apiCode";
+import { userStore } from "../../store/UserStore";
 import { useNavigate } from "react-router-dom";
 
 

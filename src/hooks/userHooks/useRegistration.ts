@@ -1,7 +1,7 @@
 
 import {useState} from "react";
-import { registrationUser } from "../api/apiUser";
-import {type UserType } from "../types/UserType";
+import { registrationUser } from "../../api/apiUser";
+import {type UserType } from "../../types/localTypes/UserType";
 
 
 export const useRegistration =()=>{

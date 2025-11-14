@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import {type RelaySatusDTO } from "../hooks/useSignalR";
+import {type RelaySatusDTO } from "../hooks/signalRHooks/useSignalR";
 
 export class RelayStatusStore{
 

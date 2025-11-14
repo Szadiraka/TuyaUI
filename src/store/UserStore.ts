@@ -1,6 +1,6 @@
 import { makeAutoObservable, reaction } from "mobx";
 import { parseTokenToUserData, getToken } from "../services/tokenService";
-import type { TokenPayLoad } from "../types/ApiTypes";
+import type { TokenPayLoad } from "../types/apiTypes/ApiTypes";
 
 export interface UserStoreData{
     id: number | null;

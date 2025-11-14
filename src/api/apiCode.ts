@@ -1,5 +1,5 @@
 import axios from "axios";
-import {type SuccessResponse } from "../types/ApiTypes";
+import {type SuccessResponse } from "../types/apiTypes/ApiTypes";
 import { userStore } from "../store/UserStore";
 
 

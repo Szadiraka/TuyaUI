@@ -1,5 +1,5 @@
 import {jwtDecode} from "jwt-decode";
-import {type TokenPayLoad } from "../types/ApiTypes";
+import {type TokenPayLoad } from "../types/apiTypes/ApiTypes";
 
 
 const TOKEN_KEY ="auth_token";

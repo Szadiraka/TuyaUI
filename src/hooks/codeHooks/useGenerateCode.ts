@@ -1,6 +1,6 @@
 
 import {useState} from "react";
-import { generateCode } from "../api/apiCode";
+import { generateCode } from "../../api/apiCode";
 
 
 export const useGenerateCode =()=>{

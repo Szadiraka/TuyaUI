@@ -1,14 +1,14 @@
 import React, { useRef } from "react";
 import { useState } from "react";
-import { type UserProps } from "../types/UserProps";
+import { type UserProps } from "../types/localTypes/UserProps";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 
-import { useLogin } from "../hooks/useLogin";
-import { useRegistration } from "../hooks/useRegistration";
+import { useLogin } from "../hooks/userHooks/useLogin";
+import { useRegistration } from "../hooks/userHooks/useRegistration";
 import { AiOutlineClose } from "react-icons/ai";
 
-import { useGenerateCode } from "../hooks/useGenerateCode";
-import { useConfirmCode } from "../hooks/useConfirmCode";
+import { useGenerateCode } from "../hooks/codeHooks/useGenerateCode";
+import { useConfirmCode } from "../hooks/codeHooks/useConfirmCode";
 import { logout } from "../services/tokenService";
 import { userStore } from "../store/UserStore";
 

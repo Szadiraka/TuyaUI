@@ -1,7 +1,7 @@
 import "./App.css";
 import { BrowserRouter } from "react-router-dom";
 
-import { useSignalR } from "./hooks/useSignalR";
+import { useSignalR } from "./hooks/signalRHooks/useSignalR";
 
 import AppRoutes from "./routes/AppRoutes";
 

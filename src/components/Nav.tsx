@@ -15,7 +15,7 @@ const Nav = observer(() => {
   };
 
   const getNavLinkClass = (path: string) => {
-    return `hover:cursor-pointer hover:border-b-2 hover:border-green-500 pb-2 max-w-[100px] sm:max-w-max text-center  ${
+    return `hover:cursor-pointer border-b-2 hover:border-green-500 pb-2 max-w-[100px] sm:max-w-max text-center  ${
       activePath === path ? "border-b-2 border-red-500" : "border-transparent "
     }`;
   };
@@ -53,7 +53,7 @@ const Nav = observer(() => {
               to={"/manage_devices"}
               className={getNavLinkClass("/manage_devices")}
             >
-              Керування пристроями
+              Керування домом
             </NavLink>
           )}
 

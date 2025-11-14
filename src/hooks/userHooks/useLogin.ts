@@ -1,9 +1,9 @@
-import  {loginUser} from "../api/apiUser";
+import  {loginUser} from "../../api/apiUser";
 import {useState} from "react";
-import { saveToken, parseTokenToUserData } from "../services/tokenService";
+import { saveToken, parseTokenToUserData } from "../../services/tokenService";
 import { useNavigate } from "react-router-dom";
-import type { TokenPayLoad } from "../types/ApiTypes";
-import {userStore} from "../store/UserStore";
+import type { TokenPayLoad } from "../../types/apiTypes/ApiTypes";
+import {userStore} from "../../store/UserStore";
 
 
 
